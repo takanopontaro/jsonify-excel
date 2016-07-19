@@ -144,3 +144,11 @@ Returned cell values have data type based on the rules below.
 |date|string|'April 14, 1954'|
 |number|string|'62'|
 |error|new Error(cell value)|new Error('#DIV/0!')|
+
+## test
+
+```shell
+$ npm i
+$ npm run build
+$ npm test
+```
