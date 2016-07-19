@@ -137,7 +137,7 @@ becomes
 
 Returned cell values have data type based on the rules below.
 
-|Excel|JSON||
+|Excel|JSON|sample|
 |---|---|---|
 |string|string|'Katsuhiro Otomo'|
 |boolean|boolean|true|
