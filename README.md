@@ -147,7 +147,7 @@ Returned cell values have data type based on the rules below.
 
 ## test
 
-```shell
+```bash
 $ npm i
 $ npm run build
 $ npm test
