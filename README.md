@@ -15,7 +15,7 @@ Sreadsheet used by this document is below.
 `Name` is String, `Retired` is Boolean, `Born` is Date, `Age` is Number and `Error` is Error.
 
 |Name|Retired|Born|Age|Error|
-|-|-|-|-|-|
+|---|---|---|---|---|
 |Katsuhiro Otomo|FALSE|April 14, 1954|62|#DIV/0!|
 |Hayao Miyazaki|TRUE|January 5, 1941|75|#NAME?|
 |Hideaki Anno|FALSE|May 22, 1960|56|#REF!|
@@ -81,7 +81,7 @@ Return Array of object based on `config` and `map`.
 A plain object has a structure below.
 
 |key|type|default|description|
-|-|-|-|-|
+|---|---|---|---|
 |file|string|null|Path to a excel file|
 |sheet|string/number|0|Target sheet name or zero-based index|
 |start|number|2|One-based start row number|
@@ -138,7 +138,7 @@ becomes
 Returned cell values have data type based on the rules below.
 
 |Excel|JSON||
-|-|-|-|
+|---|---|---|
 |string|string|'Katsuhiro Otomo'|
 |boolean|boolean|true|
 |date|string|'April 14, 1954'|
