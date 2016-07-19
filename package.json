@@ -1,0 +1,46 @@
+{
+  "name": "jsonify-excel",
+  "description": "Jsonify Excel files.",
+  "version": "0.0.1",
+  "author": "takanopontaro",
+  "bugs": {
+    "url": "https://github.com/takanopontaro/node-jsonify-excel/issues"
+  },
+  "files": [
+    "dist/index.js"
+  ],
+  "homepage": "https://github.com/takanopontaro/node-jsonify-excel",
+  "keywords": [
+    "excel",
+    "xlsx",
+    "json"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takanopontaro/node-jsonify-excel.git"
+  },
+  "dependencies": {
+    "xlsx": "^0.8.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.10.1",
+    "babel-preset-es2015": "^6.9.0",
+    "chai": "^3.5.0",
+    "eslint": "^3.1.1",
+    "eslint-config-airbnb-base": "^4.0.2",
+    "eslint-plugin-import": "^1.11.0",
+    "lodash": "^4.13.1",
+    "mocha": "^2.5.3"
+  },
+  "scripts": {
+    "test": "mocha",
+    "start": "babel -w src -d dist"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  }
+}
