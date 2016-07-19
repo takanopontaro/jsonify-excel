@@ -85,7 +85,7 @@ A plain object has a structure below.
 |file|string|null|Path to a excel file|
 |sheet|string/number|0|Target sheet name or zero-based index|
 |start|number|2|One-based start row number|
-|condition|function|function (cell, row) { return !!cell('A'); }|Conditional function called just before starting to parse current row. It has 2 arguments. `cell` is function to get a cell value passed column as its arguments. `row` is current row number. Function needs to return true (proceed) or false (exit) or null (skip current row).|
+|condition|function|function (cell, row) { return !!cell('A'); }|Conditional function called just before starting to parse current row. It has 2 arguments. `cell` is function to get a cell value passed column as its arguments. `row` is current row number. It needs to return true (proceed) or false (exit) or null (skip current row).|
 
 ### map
 
