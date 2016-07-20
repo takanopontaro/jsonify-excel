@@ -2,24 +2,26 @@ const _ = require('lodash');
 const { assert } = require('chai');
 const Je = require('../dist/index');
 
+const je = new Je('test/test.xlsx');
+
 const baseConfig = {
-  file: 'test/test.xlsx',
   sheet: 0,
   start: 2,
   condition(cell) { return !!cell('A'); },
 };
 
-const baseMap = {
+const baseMap = [{
   name: '*A',
   retired: '*B',
   born: '*C',
   age: '*D',
   error: '*E',
-};
+}];
+
 
 describe('actions', function () {
   it('get cell data based on map', function () {
-    const json = new Je(baseConfig, baseMap).toJSON();
+    const json = je.toJSON(baseConfig, baseMap);
     const { name, retired, born, age, error } = json[1];
     assert.equal(json.length, 3);
     assert.equal(name, 'Hayao Miyazaki');
@@ -30,7 +32,7 @@ describe('actions', function () {
   });
 
   it('should be type suitable for its data', function () {
-    const json = new Je(baseConfig, baseMap).toJSON();
+    const json = je.toJSON(baseConfig, baseMap);
     const { name, retired, born, age, error } = json[0];
     assert.equal(_.isString(name), true);
     assert.equal(_.isBoolean(retired), true);
@@ -46,7 +48,7 @@ describe('actions', function () {
         return !!cell('A');
       }
     });
-    const json = new Je(config, baseMap).toJSON();
+    const json = je.toJSON(config, baseMap);
     assert.equal(json.length, 2);
     assert.equal(json[0].name, 'Katsuhiro Otomo');
     assert.equal(json[1].name, 'Hideaki Anno');
@@ -56,7 +58,7 @@ describe('actions', function () {
     const map = {
       '*A': (cell, row) => `${row}: ${cell('C')} (${cell('D')})`,
     };
-    const json = new Je(baseConfig, map).toJSON();
-    assert.equal(json[0]['Katsuhiro Otomo'], '2: April 14, 1954 (62)');
+    const json = je.toJSON(baseConfig, map);
+    assert.equal(json['Katsuhiro Otomo'], '2: April 14, 1954 (62)');
   });
 });

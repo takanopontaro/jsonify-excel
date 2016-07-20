@@ -3,21 +3,14 @@ const XLSX = require('xlsx');
 module.exports = class {
   get defaultOptions() {
     return {
-      file: null,
       sheet: 0,
       start: 2,
       condition(cell) { return !!cell('A'); },
     };
   }
 
-  constructor(config, map) {
-    const { file, sheet, start, condition } = Object.assign({}, this.defaultOptions, config);
-    const workbook = XLSX.readFile(file);
-    const sheetName = this.is(sheet, 'string') ? sheet : workbook.SheetNames[sheet];
-    this.worksheet = workbook.Sheets[sheetName];
-    this.currentRow = start;
-    this.condition = condition;
-    this.map = map;
+  constructor(filePath) {
+    this.workbook = XLSX.readFile(filePath);
   }
 
   is(value, type) {
@@ -61,12 +54,15 @@ module.exports = class {
     };
   }
 
-  collectDate(dataSet = []) {
+  collectDate(dataSet, map) {
     const cellValue = this.cellValueGetter(this.currentRow);
     switch (this.condition(cellValue, this.currentRow)) {
-      case true:
-        dataSet.push(this.parse(this.map, cellValue));
+      case true: {
+        const data = this.parse(map, cellValue);
+        if (dataSet.push) dataSet.push(data);
+        else Object.assign(dataSet, data);
         break;
+      }
       case null:
         // skip this turn
         break;
@@ -75,10 +71,17 @@ module.exports = class {
         return dataSet;
     }
     this.currentRow++;
-    return this.collectDate(dataSet);
+    return this.collectDate(dataSet, map);
   }
 
-  toJSON() {
-    return this.collectDate();
+  toJSON(config, map) {
+    const { sheet, start, condition } = Object.assign({}, this.defaultOptions, config);
+    const sheetName = this.is(sheet, 'string') ? sheet : this.workbook.SheetNames[sheet];
+    this.worksheet = this.workbook.Sheets[sheetName];
+    this.currentRow = start;
+    this.condition = condition;
+    this.map = map;
+    return this.is(this.map, 'array') ?
+      this.collectDate([], this.map[0]) : this.collectDate({}, this.map);
   }
 };

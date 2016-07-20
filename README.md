@@ -26,7 +26,6 @@ Basic code:
 const Je = require('jsonify-excel');
 
 const config = {
-  file: 'test.xlsx',
   sheet: 0,
   start: 2,
   condition: function (cell) {
@@ -34,15 +33,15 @@ const config = {
   },
 };
 
-const map = {
+const map = [{
   name: '*A',
   retired: '*B',
   born: '*C',
   age: '*D',
   error: '*E',
-};
+}];
 
-const json = new Je(config, map).toJSON();
+const json = new Je('test.xlsx').toJSON(config, map);
 
 console.log(json);
 ```
@@ -67,14 +66,14 @@ becomes
     error: [Error Object] } ]
 ```
 
-### constructor(config, map)
+### constructor(filePath)
 
+`filePath` is path to your excel file.
+
+### toJSON(config, map)
+
+Return an array of object or an object based on `config` and `map`.
 For details of `config` and `map`, see below.
-
-### toJSON()
-
-Return Array of object based on `config` and `map`.
-
 
 ### config
 
@@ -82,43 +81,53 @@ A plain object has a structure below.
 
 |key|type|default|description|
 |---|---|---|---|
-|file|string|null|Path to a excel file|
 |sheet|string/number|0|Target sheet name or zero-based index|
 |start|number|2|One-based start row number|
 |condition|function|function (cell, row) { return !!cell('A'); }|Conditional function called just before starting to parse current row. It has 2 arguments. `cell` is function to get a cell value passed column as its arguments. `row` is current row number. It needs to return true (proceed) or false (exit) or null (skip current row).|
 
 ### map
 
-A plain object has a structure you want as JSON.
+A plain object has a structure you want as JSON. Uppercase alphabets start with `*` are replaced with cell data of that column.
 
-Uppercase alphabets start with `*` are replaced with cell data of that column.
+If it's wrapped by an array, one row is parsed as one item of returned array. Or all collected data are merged to one object and it's returned.
 
 ```js
-{
+[{
   name: '*A',
-  age: '*B',
-  address: 'C',
-  job: '*d',
-}
+  retired: 'B',
+  born: '*c',
+  age: '*D',
+}]
 ```
 
 becomes
 
 ```js
+[ { name: 'Katsuhiro Otomo',
+    retired: 'B', // <-- not replaced
+    born: '*c', // <-- not replaced
+    age: '62' },
+  { name: 'Hayao Miyazaki', ... },
+  { name: 'Hideaki Anno', ... } ]
+```
+
+```js
 {
-  name: 'Katsuhiro Otomo',
-  age: '62',
-  address: 'C', // <-- not replaced
-  job: '*d', // <-- not replaced
+  name: '*A',
 }
+```
+
+becomes below because the map is object not array and `name` property is overwritten with followed rows.
+
+```js
+{ name: 'Hideaki Anno' }
 ```
 
 You can get cell data as a key of JSON and also use a callback function same as one described in config section above.
 
 ```js
 {
-  '*A': 'name',
-  name: function (cell, row) {
+  '*A': function (cell, row) {
     return cell('A');
   },
 }
@@ -128,8 +137,9 @@ becomes
 
 ```js
 {
-  'Katsuhiro Otomo': 'name',
-  name: 'Katsuhiro Otomo',
+  'Katsuhiro Otomo': 'Katsuhiro Otomo',
+  'Hayao Miyazaki': 'Hayao Miyazaki',
+  'Hideaki Anno': 'Hideaki Anno'
 }
 ```
 
