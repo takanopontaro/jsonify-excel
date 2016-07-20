@@ -73,6 +73,7 @@ becomes
 ### toJSON(config, map)
 
 Return an array of object or an object based on `config` and `map`.
+
 For details of `config` and `map`, see below.
 
 ### config
