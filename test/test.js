@@ -31,6 +31,17 @@ describe('actions', function () {
     assert.equal(error.message, '#NAME?');
   });
 
+  it('generate map automatically', function () {
+    const json = je.toJSON(_.merge({}, baseConfig, { automap: true, start: 1 }));
+    const { Name, Retired, Born, Age, Error } = json[1];
+    assert.equal(json.length, 3);
+    assert.equal(Name, 'Hayao Miyazaki');
+    assert.equal(Retired, true);
+    assert.equal(Born, 'January 5, 1941');
+    assert.equal(Age, '75');
+    assert.equal(Error.message, '#NAME?');
+  });
+
   it('should be type suitable for its data', function () {
     const json = je.toJSON(baseConfig, baseMap);
     const { name, retired, born, age, error } = json[0];

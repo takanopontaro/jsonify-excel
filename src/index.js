@@ -3,6 +3,7 @@ const XLSX = require('xlsx');
 module.exports = class {
   get defaultOptions() {
     return {
+      automap: false,
       sheet: 0,
       start: 2,
       condition(cell) { return !!cell('A'); },
@@ -74,13 +75,24 @@ module.exports = class {
     return this.collectDate(dataSet, map);
   }
 
+  getHeaderMap() {
+    const cellValue = this.cellValueGetter(this.currentRow++);
+    const map = {};
+    for (let i = 0; ; i++) {
+      const col = XLSX.utils.encode_col(i);
+      const value = cellValue(col);
+      if (!value) return [map];
+      map[value] = `*${col}`;
+    }
+  }
+
   toJSON(config, map) {
-    const { sheet, start, condition } = Object.assign({}, this.defaultOptions, config);
+    const { automap, sheet, start, condition } = Object.assign({}, this.defaultOptions, config);
     const sheetName = this.is(sheet, 'string') ? sheet : this.workbook.SheetNames[sheet];
     this.worksheet = this.workbook.Sheets[sheetName];
     this.currentRow = start;
     this.condition = condition;
-    this.map = map;
+    this.map = automap ? this.getHeaderMap() : map;
     return this.is(this.map, 'array') ?
       this.collectDate([], this.map[0]) : this.collectDate({}, this.map);
   }
