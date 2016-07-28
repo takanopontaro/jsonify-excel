@@ -26,6 +26,7 @@ Basic code:
 const Je = require('jsonify-excel');
 
 const config = {
+  automap: false,
   sheet: 0,
   start: 2,
   condition: function (cell) {
@@ -82,8 +83,9 @@ A plain object has a structure below.
 
 |key|type|default|description|
 |---|---|---|---|
-|sheet|string/number|0|Target sheet name or zero-based index|
-|start|number|2|One-based start row number|
+|automap|boolean|false|Generate map based on header cells automatically. Cell texts become keys of JSON.|
+|sheet|string/number|0|Target sheet name or zero-based index.|
+|start|number|2|One-based start row number. If `automap` is `true`, this parameter means header row.|
 |condition|function|function (cell, row) { return !!cell('A'); }|Conditional function called just before starting to parse current row. It has 2 arguments. `cell` is function to get a cell value passed column as its arguments. `row` is current row number. It needs to return true (proceed) or false (exit) or null (skip current row).|
 
 ### map
@@ -142,6 +144,26 @@ becomes
   'Hayao Miyazaki': 'Hayao Miyazaki',
   'Hideaki Anno': 'Hideaki Anno'
 }
+```
+
+#### automap
+
+Mostly, header texts are used as keys of JSON. So you can set `automap` to `true`.
+
+```js
+new Je('test.xlsx').toJSON({ automap: true }); // No need 2nd argument
+```
+
+is the same map as below.
+
+```js
+[{
+  Name: '*A',
+  Retired: '*B',
+  Born: '*C',
+  Age: '*D',
+  Error: '*E',
+}]
 ```
 
 ### data type
