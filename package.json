@@ -1,7 +1,7 @@
 {
   "name": "jsonify-excel",
   "description": "Jsonify Excel files.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "takanopontaro",
   "bugs": {
     "url": "https://github.com/takanopontaro/node-jsonify-excel/issues"
