@@ -148,10 +148,10 @@ becomes
 
 #### automap
 
-Mostly, header texts are used as keys of JSON. So you can set `automap` to `true`.
+Mostly, header texts are used as keys of JSON. So you can set `automap` to `true`. Note that `start` means header row in this case.
 
 ```js
-new Je('test.xlsx').toJSON({ automap: true }); // No need 2nd argument
+new Je('test.xlsx').toJSON({ automap: true, start: 1 }); // No need 2nd argument
 ```
 
 is the same map as below.
