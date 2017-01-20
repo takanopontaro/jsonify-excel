@@ -89,8 +89,9 @@ module.exports = class {
   toJSON(config, map) {
     const { automap, sheet, start, condition } = Object.assign({}, this.defaultOptions, config);
     const sheetName = this.is(sheet, 'string') ? sheet : this.workbook.SheetNames[sheet];
+    const start2 = (automap && config.start === undefined) ? 1 : start;
     this.worksheet = this.workbook.Sheets[sheetName];
-    this.currentRow = start;
+    this.currentRow = start2;
     this.condition = condition;
     this.map = automap ? this.getHeaderMap() : map;
     return this.is(this.map, 'array') ?
