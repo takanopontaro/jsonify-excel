@@ -85,7 +85,7 @@ A plain object has a structure below.
 |---|---|---|---|
 |automap|boolean|false|Generate map based on header cells automatically. Cell texts become keys of JSON.|
 |sheet|string/number|0|Target sheet name or zero-based index.|
-|start|number|2|One-based start row number. If `automap` is `true`, this parameter means header row.|
+|start|number|2|One-based start row number. If `automap` is `true`, this parameter means header row and default value is set to `1` automatically.|
 |condition|function|function (cell, row) { return !!cell('A'); }|Conditional function called just before starting to parse current row. It has 2 arguments. `cell` is function to get a cell value passed column as its arguments. `row` is current row number. It needs to return true (proceed) or false (exit) or null (skip current row).|
 
 ### map
