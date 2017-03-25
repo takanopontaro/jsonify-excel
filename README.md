@@ -87,6 +87,7 @@ A plain object has a structure below.
 |sheet|string/number|0|Target sheet name or zero-based index.|
 |start|number|2|One-based start row number. If `automap` is `true`, this parameter means header row and default value is set to `1` automatically.|
 |condition|function|function (cell, row) { return !!cell('A'); }|Conditional function called just before starting to parse current row. It has 2 arguments. `cell` is function to get a cell value passed column as its arguments. `row` is current row number. It needs to return true (proceed) or false (exit) or null (skip current row).|
+|filter|function|null|Function defines the current column is available or not. It has one argument that means the current column as upper-case letters. It needs to return true (include) or false (exclude). This option is available only when `automap` is `true`.|
 
 ### map
 
@@ -164,6 +165,18 @@ is the same map as below.
   Age: '*D',
   Error: '*E',
 }]
+```
+
+You can define a function to filter columns. Below ignores from column A to E.
+
+```js
+{
+  automap: true,
+  start: 1,
+  filter: function (row) {
+    return !/^[A-E]$/.test(row);
+  }
+}
 ```
 
 ### data type

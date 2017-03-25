@@ -7,6 +7,7 @@ module.exports = class {
       sheet: 0,
       start: 2,
       condition(cell) { return !!cell('A'); },
+      filter: null,
     };
   }
 
@@ -55,7 +56,7 @@ module.exports = class {
     };
   }
 
-  collectDate(dataSet, map) {
+  collectData(dataSet, map) {
     const cellValue = this.cellValueGetter(this.currentRow);
     switch (this.condition(cellValue, this.currentRow)) {
       case true: {
@@ -72,7 +73,7 @@ module.exports = class {
         return dataSet;
     }
     this.currentRow++;
-    return this.collectDate(dataSet, map);
+    return this.collectData(dataSet, map);
   }
 
   getHeaderMap() {
@@ -82,19 +83,22 @@ module.exports = class {
       const col = XLSX.utils.encode_col(i);
       const value = cellValue(col);
       if (!value) return [map];
+      if (this.filter && !this.filter(col)) continue;
       map[value] = `*${col}`;
     }
   }
 
   toJSON(config, map) {
-    const { automap, sheet, start, condition } = Object.assign({}, this.defaultOptions, config);
+    const { automap, sheet, start, condition, filter } =
+      Object.assign({}, this.defaultOptions, config);
     const sheetName = this.is(sheet, 'string') ? sheet : this.workbook.SheetNames[sheet];
     const start2 = (automap && config.start === undefined) ? 1 : start;
     this.worksheet = this.workbook.Sheets[sheetName];
     this.currentRow = start2;
     this.condition = condition;
+    this.filter = filter;
     this.map = automap ? this.getHeaderMap() : map;
     return this.is(this.map, 'array') ?
-      this.collectDate([], this.map[0]) : this.collectDate({}, this.map);
+      this.collectData([], this.map[0]) : this.collectData({}, this.map);
   }
 };
