@@ -173,8 +173,8 @@ You can define a function to filter columns. Below ignores from column A to E.
 {
   automap: true,
   start: 1,
-  filter: function (row) {
-    return !/^[A-E]$/.test(row);
+  filter: function (col) {
+    return !/^[A-E]$/.test(col);
   }
 }
 ```
