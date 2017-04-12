@@ -1,7 +1,7 @@
 {
   "name": "jsonify-excel",
   "description": "Jsonify Excel files.",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": "takanopontaro",
   "bugs": {
     "url": "https://github.com/takanopontaro/node-jsonify-excel/issues"
@@ -22,7 +22,7 @@
     "url": "https://github.com/takanopontaro/node-jsonify-excel.git"
   },
   "dependencies": {
-    "xlsx": "^0.8.0"
+    "xlsx": "0.x"
   },
   "devDependencies": {
     "babel-cli": "^6.10.1",
