@@ -1,75 +1,75 @@
-const _ = require('lodash');
-const { assert } = require('chai');
-const Je = require('../dist/index');
+import test from 'ava';
+import Je from '../dist/main';
 
 const je = new Je('test/test.xlsx');
 
-const baseConfig = {
-  sheet: 0,
-  start: 2,
-  condition(cell) { return !!cell('A'); },
-};
+test('user map', t => {
+  const json = je.toJson(
+    { startRowNum: 1 },
+    {
+      Name: '*A',
+      Retired: '*B',
+      Born: '*C',
+      Age: '*D',
+      Error: '*E',
+      Sex: '*G',
+    },
+  );
+  t.is(json[1].Age, '75');
+});
 
-const baseMap = [{
-  name: '*A',
-  retired: '*B',
-  born: '*C',
-  age: '*D',
-  error: '*E',
-}];
+test('automap', t => {
+  const json = je.toJson({ automap: true });
+  t.is(json.length, 3);
+  t.is(Object.keys(json[0]).length, 5);
+});
 
-
-describe('actions', function () {
-  it('get cell data based on map', function () {
-    const json = je.toJSON(baseConfig, baseMap);
-    const { name, retired, born, age, error } = json[1];
-    assert.equal(json.length, 3);
-    assert.equal(name, 'Hayao Miyazaki');
-    assert.equal(retired, true);
-    assert.equal(born, 'January 5, 1941');
-    assert.equal(age, '75');
-    assert.equal(error.message, '#NAME?');
+test('scope', t => {
+  const json = je.toJson({
+    automap: {
+      scope(value, addr, rowNum, colNum) {
+        return value !== undefined;
+      },
+    },
   });
+  t.is(Object.keys(json[0]).length, 6);
+});
 
-  it('generate map automatically', function () {
-    const json = je.toJSON(_.merge({}, baseConfig, { automap: true, start: 1 }));
-    const { Name, Retired, Born, Age, Error } = json[1];
-    assert.equal(json.length, 3);
-    assert.equal(Name, 'Hayao Miyazaki');
-    assert.equal(Retired, true);
-    assert.equal(Born, 'January 5, 1941');
-    assert.equal(Age, '75');
-    assert.equal(Error.message, '#NAME?');
-  });
+test('data type', t => {
+  const json = je.toJson({ automap: true });
+  t.is(json[0].Name.constructor, String);
+  t.is(json[0].Retired.constructor, Boolean);
+  t.is(json[0].Born.constructor, Date);
+  t.is(json[0].Age.constructor, String);
+  t.is(json[0].Error.constructor, Error);
+});
 
-  it('should be type suitable for its data', function () {
-    const json = je.toJSON(baseConfig, baseMap);
-    const { name, retired, born, age, error } = json[0];
-    assert.equal(_.isString(name), true);
-    assert.equal(_.isBoolean(retired), true);
-    assert.equal(_.isString(born), true);
-    assert.equal(_.isString(age), true);
-    assert.equal(_.isError(error), true);
-  });
+test('compact', t => {
+  let json = je.toJson({ automap: true });
+  t.is('Error' in json[1], false);
+  json = je.toJson({ automap: true, compact: false });
+  t.is('Error' in json[1], true);
+});
 
-  it('should be skipped row 3', function () {
-    const config = _.merge({}, baseConfig, {
-      condition(cell, row) {
-        if (row === 3) return null;
-        return !!cell('A');
-      }
-    });
-    const json = je.toJSON(config, baseMap);
-    assert.equal(json.length, 2);
-    assert.equal(json[0].name, 'Katsuhiro Otomo');
-    assert.equal(json[1].name, 'Hideaki Anno');
+test('filter', t => {
+  const json = je.toJson({
+    automap: true,
+    filters: [
+      'trim',
+      'undef',
+      (value, info) => {
+        if (
+          info.rowNum === 2 &&
+          info.col === 'C' &&
+          info.colNum === 2 &&
+          info.key == 'Born' &&
+          info.cell('Name', true) === 'Hayao Miyazaki'
+        ) {
+          return value.getFullYear();
+        }
+        return value;
+      },
+    ],
   });
-
-  it('key of json is dynamic and value is possible to be function', function () {
-    const map = {
-      '*A': (cell, row) => `${row}: ${cell('C')} (${cell('D')})`,
-    };
-    const json = je.toJSON(baseConfig, map);
-    assert.equal(json['Katsuhiro Otomo'], '2: April 14, 1954 (62)');
-  });
+  t.is(json[1].Born, 1941);
 });
