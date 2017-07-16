@@ -1,12 +1,12 @@
 {
   "name": "jsonify-excel",
   "description": "Jsonify Excel files.",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "author": "takanopontaro",
   "keywords": ["excel", "xlsx", "json"],
   "license": "MIT",
   "main": "dist/main.js",
-  "files": ["dist/index.js"],
+  "files": ["dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/takanopontaro/node-jsonify-excel.git"

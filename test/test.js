@@ -15,7 +15,7 @@ test('user map', t => {
       Sex: '*G',
     },
   );
-  t.is(json[1].Age, '75');
+  t.is(json[1].Age, 75);
 });
 
 test('automap', t => {
@@ -40,7 +40,7 @@ test('data type', t => {
   t.is(json[0].Name.constructor, String);
   t.is(json[0].Retired.constructor, Boolean);
   t.is(json[0].Born.constructor, Date);
-  t.is(json[0].Age.constructor, String);
+  t.is(json[0].Age.constructor, Number);
   t.is(json[0].Error.constructor, Error);
 });
 
@@ -49,6 +49,13 @@ test('compact', t => {
   t.is('Error' in json[1], false);
   json = je.toJson({ automap: true, compact: false });
   t.is('Error' in json[1], true);
+});
+
+test('number', t => {
+  let json = je.toJson({ automap: true });
+  t.is(json[2].Age, 56.5);
+  json = je.toJson({ automap: true, number: false });
+  t.is(json[2].Age, '56.5');
 });
 
 test('filter', t => {

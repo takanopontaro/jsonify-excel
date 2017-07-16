@@ -20,13 +20,14 @@ interface IAutomap {
   ) => boolean;
 }
 
-interface IOption {
+interface IOptions {
   automap?: boolean | IAutomap;
   sheet?: number | string;
   startRowNum?: number;
   check?: string | ((info: ICellInfo) => boolean);
   filters?: Array<string | Filter>;
   compact?: boolean;
+  number?: boolean;
 }
 
 interface ICellInfo {
@@ -47,7 +48,7 @@ interface IWsInfo {
 class JsonifyExcel {
   private book: XLSX.WorkBook;
   private sheet: XLSX.WorkSheet;
-  private option: IOption;
+  private options: IOptions;
   private wsInfo: IWsInfo;
   private curRowNum: number;
   private map: Map;
@@ -59,16 +60,17 @@ class JsonifyExcel {
     },
   };
 
-  private defaultOption: IOption = {
+  private defaultOptions: IOptions = {
     automap: false,
     sheet: 0,
     startRowNum: 0,
     check: 'A',
     filters: ['trim', 'undef'],
     compact: true,
+    number: true,
   };
 
-  private defaultFilter: { [key: string]: Filter } = {
+  private defaultFilters: { [key: string]: Filter } = {
     trim(value, info) {
       if (!_.isString(value)) {
         return value;
@@ -91,15 +93,15 @@ class JsonifyExcel {
     });
   }
 
-  public toJson(config: IOption, map?: Map): IObj[] {
-    this.option = _.merge({}, this.defaultOption, config);
-    const { sheet } = this.option;
+  public toJson(options: IOptions, map?: Map): IObj[] {
+    this.options = _.merge({}, this.defaultOptions, options);
+    const { sheet } = this.options;
     const sheetName = _.isString(sheet) ? sheet : this.book.SheetNames[sheet];
     this.sheet = this.book.Sheets[sheetName];
     this.wsInfo = this.getWsInfo();
     this.initAutomap(map);
-    this.adjustStartRowNum('startRowNum' in config);
-    this.curRowNum = this.option.startRowNum;
+    this.adjustStartRowNum('startRowNum' in options);
+    this.curRowNum = this.options.startRowNum;
     return this.collectData([]);
   }
 
@@ -117,7 +119,7 @@ class JsonifyExcel {
   }
 
   private initAutomap(map: Map): void {
-    const opts = this.option;
+    const opts = this.options;
     if (opts.automap === false) {
       this.map = map;
     } else {
@@ -127,7 +129,7 @@ class JsonifyExcel {
   }
 
   private adjustStartRowNum(definedByUser: boolean): void {
-    const opts = this.option;
+    const opts = this.options;
     if (opts.automap === false) {
       return;
     }
@@ -176,7 +178,7 @@ class JsonifyExcel {
   }
 
   private isValidRow(info: ICellInfo): boolean {
-    const { check } = this.option;
+    const { check } = this.options;
     if (info.rowNum > this.wsInfo.endRowNum) {
       return false;
     } else if (_.isString(check)) {
@@ -190,7 +192,7 @@ class JsonifyExcel {
 
   private collectData(resultSet: IObj[]): IObj[] {
     const info = this.createCellInfo();
-    const { check } = this.option;
+    const { check } = this.options;
     switch (this.isValidRow(info)) {
       case true: {
         let result = _.reduce(
@@ -201,7 +203,7 @@ class JsonifyExcel {
           },
           {},
         );
-        if (this.option.compact) {
+        if (this.options.compact) {
           result = _.omitBy(result, v => v === undefined);
         }
         resultSet.push(result);
@@ -218,9 +220,9 @@ class JsonifyExcel {
   }
 
   private filterOut(value: CellValue, info: ICellInfo): any {
-    return this.option.filters.reduce((res, filter) => {
+    return this.options.filters.reduce((res, filter) => {
       if (_.isString(filter)) {
-        return this.defaultFilter[filter](res, info);
+        return this.defaultFilters[filter](res, info);
       } else if (_.isFunction(filter)) {
         return filter(res, info);
       } else {
@@ -236,8 +238,13 @@ class JsonifyExcel {
     }
     switch (c.t) {
       case 's':
-      case 'n':
         return c.w === undefined ? c.v : c.w;
+      case 'n':
+        if (this.options.number) {
+          return c.v;
+        } else {
+          return c.w === undefined ? c.v : c.w;
+        }
       case 'b':
         return c.v;
       case 'd':
@@ -269,14 +276,14 @@ class JsonifyExcel {
   }
 
   private getAutomapKey(col: string): string {
-    if (!this.option.automap) {
+    if (!this.options.automap) {
       return undefined;
     }
     return _.findKey(this.map, v => v === `*${col}`);
   }
 
   private getAutomapCol(key: string): string {
-    if (!this.option.automap) {
+    if (!this.options.automap) {
       return undefined;
     }
     return this.map[key].replace(/^\*/, '');
@@ -284,7 +291,7 @@ class JsonifyExcel {
 
   private getAutomap(): Map {
     const map: Map = {};
-    const { headerRowNum, scope } = this.option.automap as IAutomap;
+    const { headerRowNum, scope } = this.options.automap as IAutomap;
     const { startColNum, endColNum } = this.wsInfo;
     for (let colNum = startColNum; colNum <= endColNum; colNum++) {
       const addr = this.getCellAddr(headerRowNum, colNum);
