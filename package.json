@@ -1,7 +1,7 @@
 {
   "name": "jsonify-excel",
   "description": "Jsonify Excel files.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "takanopontaro",
   "keywords": ["excel", "xlsx", "json"],
   "license": "MIT",

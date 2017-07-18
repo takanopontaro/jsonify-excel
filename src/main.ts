@@ -135,7 +135,7 @@ class JsonifyExcel {
     }
     const headerRowNum = (opts.automap as IAutomap).headerRowNum;
     if (definedByUser) {
-      if (headerRowNum <= opts.startRowNum) {
+      if (headerRowNum >= opts.startRowNum) {
         throw new Error(`startRowNum must be bigger than ${headerRowNum}`);
       }
     } else {
