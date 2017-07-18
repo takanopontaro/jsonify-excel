@@ -16,7 +16,7 @@ interface IAutomap {
     value: CellValue,
     addr: string,
     rowNum: number,
-    colNum: number,
+    colNum: number
   ) => boolean;
 }
 
@@ -28,6 +28,8 @@ interface IOptions {
   filters?: Array<string | Filter>;
   compact?: boolean;
   number?: boolean;
+  date?: boolean;
+  error?: boolean;
 }
 
 interface ICellInfo {
@@ -57,7 +59,7 @@ class JsonifyExcel {
     headerRowNum: 0,
     scope(value, addr, rowNum, colNum) {
       return true;
-    },
+    }
   };
 
   private defaultOptions: IOptions = {
@@ -68,6 +70,8 @@ class JsonifyExcel {
     filters: ['trim', 'undef'],
     compact: true,
     number: true,
+    date: true,
+    error: true
   };
 
   private defaultFilters: { [key: string]: Filter } = {
@@ -82,14 +86,14 @@ class JsonifyExcel {
         return undefined;
       }
       return value;
-    },
+    }
   };
 
   constructor(filePath: string) {
     this.book = XLSX.readFile(filePath, {
       cellFormula: false,
       cellHTML: false,
-      cellDates: true,
+      cellDates: true
     });
   }
 
@@ -108,13 +112,13 @@ class JsonifyExcel {
   private getWsInfo(): IWsInfo {
     const {
       s: { c: sc, r: sr },
-      e: { c: ec, r: er },
+      e: { c: ec, r: er }
     } = XLSX.utils.decode_range(this.sheet['!ref']);
     return {
       startRowNum: sr,
       startColNum: sc,
       endRowNum: er,
-      endColNum: ec,
+      endColNum: ec
     };
   }
 
@@ -159,14 +163,14 @@ class JsonifyExcel {
   private createCellInfo(
     colNum?: number,
     col?: string,
-    key?: string,
+    key?: string
   ): ICellInfo {
     return {
       cell: this.createCellFunc(),
       rowNum: this.curRowNum,
       colNum,
       col,
-      key,
+      key
     };
   }
 
@@ -201,7 +205,7 @@ class JsonifyExcel {
             res[key] = this.getValue(value, info);
             return res;
           },
-          {},
+          {}
         );
         if (this.options.compact) {
           result = _.omitBy(result, v => v === undefined);
@@ -248,9 +252,17 @@ class JsonifyExcel {
       case 'b':
         return c.v;
       case 'd':
-        return new Date(c.v);
+        if (this.options.date) {
+          return new Date(c.v);
+        } else {
+          return c.w === undefined ? c.v : c.w;
+        }
       case 'e':
-        return new Error(c.w || '');
+        if (this.options.error) {
+          return new Error(c.w || '');
+        } else {
+          return c.w === undefined ? c.v : c.w;
+        }
       default:
         return undefined;
     }
@@ -258,7 +270,7 @@ class JsonifyExcel {
 
   private getCellValue(
     addrOrRowNum: string | number,
-    colNum?: number,
+    colNum?: number
   ): CellValue {
     const addr = _.isString(addrOrRowNum)
       ? addrOrRowNum
