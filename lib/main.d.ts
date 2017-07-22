@@ -22,4 +22,8 @@ declare class JsonifyExcel {
   toJson(options: Options, map?: Map): Obj[];
 }
 
+declare namespace JsonifyExcel {
+
+}
+
 export = JsonifyExcel;
