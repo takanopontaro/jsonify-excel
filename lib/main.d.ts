@@ -12,8 +12,6 @@ import {
   WsInfo,
 } from '../src/types';
 
-export = JsonifyExcel;
-
 declare class JsonifyExcel {
   constructor(filePath: string);
 
@@ -23,3 +21,5 @@ declare class JsonifyExcel {
 
   toJson(options: Options, map?: Map): Obj[];
 }
+
+export = JsonifyExcel;
