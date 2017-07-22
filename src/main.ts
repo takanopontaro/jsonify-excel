@@ -1,68 +1,36 @@
 import * as _ from 'lodash';
 import * as XLSX from 'xlsx';
 
-type Map = IObj;
-type CellValue = number | string | boolean | Date | Error;
-type Filter = (value: any, info: ICellInfo) => any;
-type CellFunc = (col: string, automapKey?: boolean) => CellValue;
-
-interface IObj {
-  [key: string]: any;
-}
-
-interface IAutomap {
-  headerRowNum?: number;
-  scope?: (
-    value: CellValue,
-    addr: string,
-    rowNum: number,
-    colNum: number
-  ) => boolean;
-}
-
-interface IOptions {
-  automap?: boolean | IAutomap;
-  sheet?: number | string;
-  startRowNum?: number;
-  check?: string | ((info: ICellInfo) => boolean);
-  filters?: Array<string | Filter>;
-  compact?: boolean;
-  number?: boolean;
-  date?: boolean;
-  error?: boolean;
-}
-
-interface ICellInfo {
-  cell: CellFunc;
-  rowNum: number;
-  colNum?: number;
-  col?: string;
-  key?: string;
-}
-
-interface IWsInfo {
-  startRowNum: number;
-  startColNum: number;
-  endRowNum: number;
-  endColNum: number;
-}
+import {
+  Map,
+  CellValue,
+  Filter,
+  CellFunc,
+  Obj,
+  Automap,
+  Options,
+  CellInfo,
+  WsInfo,
+} from './types';
 
 class JsonifyExcel {
-  private book: XLSX.WorkBook;
-  private sheet: XLSX.WorkSheet;
-  private options: IOptions;
-  private wsInfo: IWsInfo;
+  public xlsx = XLSX;
+  public book: XLSX.WorkBook;
+  public sheet: XLSX.WorkSheet;
+
+  private options: Options;
+  private wsInfo: WsInfo;
   private curRowNum: number;
   private map: Map;
 
-  private defaultAutomap: IAutomap = {
+  private defaultAutomap: Automap = {
     headerRowNum: 0,
     scope(value, addr, rowNum, colNum) {
       return true;
-    }
+    },
   };
 
-  private defaultOptions: IOptions = {
+  private defaultOptions: Options = {
     automap: false,
     sheet: 0,
     startRowNum: 0,
@@ -71,7 +39,7 @@ class JsonifyExcel {
     compact: true,
     number: true,
     date: true,
-    error: true
+    error: true,
   };
 
   private defaultFilters: { [key: string]: Filter } = {
@@ -86,18 +54,18 @@ class JsonifyExcel {
         return undefined;
       }
       return value;
-    }
+    },
   };
 
   constructor(filePath: string) {
     this.book = XLSX.readFile(filePath, {
       cellFormula: false,
       cellHTML: false,
-      cellDates: true
+      cellDates: true,
     });
   }
 
-  public toJson(options: IOptions, map?: Map): IObj[] {
+  public toJson(options: Options, map?: Map): Obj[] {
     this.options = _.merge({}, this.defaultOptions, options);
     const { sheet } = this.options;
     const sheetName = _.isString(sheet) ? sheet : this.book.SheetNames[sheet];
@@ -109,16 +77,16 @@ class JsonifyExcel {
     return this.collectData([]);
   }
 
-  private getWsInfo(): IWsInfo {
+  private getWsInfo(): WsInfo {
     const {
       s: { c: sc, r: sr },
-      e: { c: ec, r: er }
+      e: { c: ec, r: er },
     } = XLSX.utils.decode_range(this.sheet['!ref']);
     return {
       startRowNum: sr,
       startColNum: sc,
       endRowNum: er,
-      endColNum: ec
+      endColNum: ec,
     };
   }
 
@@ -137,7 +105,7 @@ class JsonifyExcel {
     if (opts.automap === false) {
       return;
     }
-    const headerRowNum = (opts.automap as IAutomap).headerRowNum;
+    const headerRowNum = (opts.automap as Automap).headerRowNum;
     if (definedByUser) {
       if (headerRowNum >= opts.startRowNum) {
         throw new Error(`startRowNum must be bigger than ${headerRowNum}`);
@@ -147,7 +115,7 @@ class JsonifyExcel {
     }
   }
 
-  private getValue(value: any, info: ICellInfo): any {
+  private getValue(value: any, info: CellInfo): any {
     switch (true) {
       case _.isString(value): {
         const md = value.match(/^\*([A-Z]+)$/);
@@ -164,13 +132,13 @@ class JsonifyExcel {
     colNum?: number,
     col?: string,
     key?: string
-  ): ICellInfo {
+  ): CellInfo {
     return {
       cell: this.createCellFunc(),
       rowNum: this.curRowNum,
       colNum,
       col,
-      key
+      key,
     };
   }
 
@@ -181,7 +149,7 @@ class JsonifyExcel {
     };
   }
 
-  private isValidRow(info: ICellInfo): boolean {
+  private isValidRow(info: CellInfo): boolean {
     const { check } = this.options;
     if (info.rowNum > this.wsInfo.endRowNum) {
       return false;
@@ -194,7 +162,7 @@ class JsonifyExcel {
     }
   }
 
-  private collectData(resultSet: IObj[]): IObj[] {
+  private collectData(resultSet: Obj[]): Obj[] {
     const info = this.createCellInfo();
     const { check } = this.options;
     switch (this.isValidRow(info)) {
@@ -223,7 +191,7 @@ class JsonifyExcel {
     return this.collectData(resultSet);
   }
 
-  private filterOut(value: CellValue, info: ICellInfo): any {
+  private filterOut(value: CellValue, info: CellInfo): any {
     return this.options.filters.reduce((res, filter) => {
       if (_.isString(filter)) {
         return this.defaultFilters[filter](res, info);
@@ -303,7 +271,7 @@ class JsonifyExcel {
 
   private getAutomap(): Map {
     const map: Map = {};
-    const { headerRowNum, scope } = this.options.automap as IAutomap;
+    const { headerRowNum, scope } = this.options.automap as Automap;
     const { startColNum, endColNum } = this.wsInfo;
     for (let colNum = startColNum; colNum <= endColNum; colNum++) {
       const addr = this.getCellAddr(headerRowNum, colNum);
