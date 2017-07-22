@@ -69,7 +69,7 @@ test('filter', t => {
           info.rowNum === 2 &&
           info.col === 'C' &&
           info.colNum === 2 &&
-          info.key == 'Born' &&
+          info.key === 'Born' &&
           info.cell('Name', true) === 'Hayao Miyazaki'
         ) {
           return value.getFullYear();

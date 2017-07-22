@@ -1,13 +1,13 @@
 {
   "name": "jsonify-excel",
   "description": "Jsonify Excel files.",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "author": "takanopontaro",
   "keywords": ["excel", "xlsx", "json"],
   "license": "MIT",
   "main": "dist/main.js",
-  "types": "lib/main.d.ts",
-  "files": ["dist", "src", "lib"],
+  "types": "dist/main.d.ts",
+  "files": ["dist"],
   "repository": "https://github.com/takanopontaro/jsonify-excel.git",
   "dependencies": {
     "lodash": "^4.17.4",
@@ -20,7 +20,7 @@
     "typescript": "^2.4.1"
   },
   "scripts": {
-    "start": "tsc -m CommonJS --outDir dist -w src/main.ts",
+    "start": "tsc -d -m CommonJS --outDir dist -w src/main.ts",
     "test": "ava test/test.js"
   }
 }
