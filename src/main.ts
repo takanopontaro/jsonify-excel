@@ -13,7 +13,7 @@ import {
   WsInfo,
 } from './types';
 
-export default class JsonifyExcel {
+class JsonifyExcel {
   public xlsx = XLSX;
   public book: XLSX.WorkBook;
   public sheet: XLSX.WorkSheet;
@@ -293,3 +293,5 @@ export default class JsonifyExcel {
     return map;
   }
 }
+
+export = JsonifyExcel;
