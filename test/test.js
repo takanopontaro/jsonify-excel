@@ -1,5 +1,5 @@
 import test from 'ava';
-import Je from '../dist/main';
+import Je from '..';
 
 const je = new Je('test/test.xlsx');
 
