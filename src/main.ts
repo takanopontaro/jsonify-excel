@@ -6,14 +6,15 @@ import {
   CellValue,
   Filter,
   CellFunc,
-  Obj,
   Automap,
   Options,
   CellInfo,
   WsInfo,
 } from './types';
 
-export default class JsonifyExcel {
+export { Map, CellValue, Filter, CellFunc, Automap, Options, CellInfo, WsInfo };
+
+export class JsonifyExcel {
   public xlsx = XLSX;
   public book: XLSX.WorkBook;
   public sheet: XLSX.WorkSheet;
@@ -65,23 +66,29 @@ export default class JsonifyExcel {
     });
   }
 
-  public toJson(options: Options, map?: Map): Obj[] {
-    this.options = _.merge({}, this.defaultOptions, options);
+  public toJson(options: Options, map?: Map): any[] {
+    this.options = _.merge(this.defaultOptions, options);
     const { sheet } = this.options;
-    const sheetName = _.isString(sheet) ? sheet : this.book.SheetNames[sheet];
+    const sheetName = _.isString(sheet)
+      ? sheet
+      : this.book.SheetNames[<number>sheet];
     this.sheet = this.book.Sheets[sheetName];
     this.wsInfo = this.getWsInfo();
     this.initAutomap(map);
     this.adjustStartRowNum('startRowNum' in options);
-    this.curRowNum = this.options.startRowNum;
+    this.curRowNum = <number>this.options.startRowNum;
     return this.collectData([]);
   }
 
   private getWsInfo(): WsInfo {
+    const ref = this.sheet['!ref'];
+    if (ref === undefined) {
+      throw new Error('invalid xlsx file detected');
+    }
     const {
       s: { c: sc, r: sr },
       e: { c: ec, r: er },
-    } = XLSX.utils.decode_range(this.sheet['!ref']);
+    } = XLSX.utils.decode_range(ref);
     return {
       startRowNum: sr,
       startColNum: sc,
@@ -105,9 +112,9 @@ export default class JsonifyExcel {
     if (opts.automap === false) {
       return;
     }
-    const headerRowNum = (opts.automap as Automap).headerRowNum;
+    const headerRowNum = <number>(<Automap>opts.automap).headerRowNum;
     if (definedByUser) {
-      if (headerRowNum >= opts.startRowNum) {
+      if (headerRowNum >= (<number>opts.startRowNum)) {
         throw new Error(`startRowNum must be bigger than ${headerRowNum}`);
       }
     } else {
@@ -158,18 +165,18 @@ export default class JsonifyExcel {
     } else if (_.isFunction(check)) {
       return check(info);
     } else {
-      throw new Error('check must be string or function.');
+      throw new Error('check must be string or function');
     }
   }
 
-  private collectData(resultSet: Obj[]): Obj[] {
+  private collectData(resultSet: any[]): any[] {
     const info = this.createCellInfo();
     const { check } = this.options;
     switch (this.isValidRow(info)) {
       case true: {
         let result = _.reduce(
           this.map,
-          (res, value, key) => {
+          (res: any, value, key) => {
             res[key] = this.getValue(value, info);
             return res;
           },
@@ -191,19 +198,20 @@ export default class JsonifyExcel {
     return this.collectData(resultSet);
   }
 
-  private filterOut(value: CellValue, info: CellInfo): any {
-    return this.options.filters.reduce((res, filter) => {
+  private filterOut(value: CellValue | undefined, info: CellInfo): any {
+    const filters = this.options.filters as Array<string | Filter>;
+    return filters.reduce((res, filter) => {
       if (_.isString(filter)) {
         return this.defaultFilters[filter](res, info);
       } else if (_.isFunction(filter)) {
         return filter(res, info);
       } else {
-        throw new Error('filter must be string or function.');
+        throw new Error('filter must be string or function');
       }
     }, value);
   }
 
-  private extractCellValue(addr: string): CellValue {
+  private extractCellValue(addr: string): CellValue | undefined {
     const c = this.sheet[addr];
     if (c === undefined) {
       return c;
@@ -242,7 +250,7 @@ export default class JsonifyExcel {
   ): CellValue {
     const addr = _.isString(addrOrRowNum)
       ? addrOrRowNum
-      : this.getCellAddr(addrOrRowNum, colNum);
+      : this.getCellAddr(addrOrRowNum, <number>colNum);
     const value = this.extractCellValue(addr);
     const { s: { c } } = XLSX.utils.decode_range(addr);
     const col = XLSX.utils.encode_col(c);
@@ -255,14 +263,14 @@ export default class JsonifyExcel {
     return `${encode_col(colNum)}${encode_row(rowNum)}`;
   }
 
-  private getAutomapKey(col: string): string {
+  private getAutomapKey(col: string): string | undefined {
     if (!this.options.automap) {
       return undefined;
     }
     return _.findKey(this.map, v => v === `*${col}`);
   }
 
-  private getAutomapCol(key: string): string {
+  private getAutomapCol(key: string): string | undefined {
     if (!this.options.automap) {
       return undefined;
     }
@@ -274,13 +282,13 @@ export default class JsonifyExcel {
     const { headerRowNum, scope } = this.options.automap as Automap;
     const { startColNum, endColNum } = this.wsInfo;
     for (let colNum = startColNum; colNum <= endColNum; colNum++) {
-      const addr = this.getCellAddr(headerRowNum, colNum);
+      const addr = this.getCellAddr(<number>headerRowNum, colNum);
       const { s: { c, r } } = XLSX.utils.decode_range(addr);
       let value = this.extractCellValue(addr);
       if (_.isString(value)) {
         value = value.trim();
       }
-      if (!scope(value, addr, r, c)) {
+      if (scope && !scope(value, addr, r, c)) {
         continue;
       }
       if (value === undefined) {

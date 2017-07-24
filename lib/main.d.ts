@@ -1,0 +1,32 @@
+import * as XLSX from 'xlsx';
+import { Map, CellValue, Filter, CellFunc, Automap, Options, CellInfo, WsInfo } from './types';
+export { Map, CellValue, Filter, CellFunc, Automap, Options, CellInfo, WsInfo };
+export declare class JsonifyExcel {
+    xlsx: typeof XLSX;
+    book: XLSX.WorkBook;
+    sheet: XLSX.WorkSheet;
+    private options;
+    private wsInfo;
+    private curRowNum;
+    private map;
+    private defaultAutomap;
+    private defaultOptions;
+    private defaultFilters;
+    constructor(filePath: string);
+    toJson(options: Options, map?: Map): any[];
+    private getWsInfo();
+    private initAutomap(map);
+    private adjustStartRowNum(definedByUser);
+    private getValue(value, info);
+    private createCellInfo(colNum?, col?, key?);
+    private createCellFunc();
+    private isValidRow(info);
+    private collectData(resultSet);
+    private filterOut(value, info);
+    private extractCellValue(addr);
+    private getCellValue(addrOrRowNum, colNum?);
+    private getCellAddr(rowNum, colNum);
+    private getAutomapKey(col);
+    private getAutomapCol(key);
+    private getAutomap();
+}

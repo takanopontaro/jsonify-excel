@@ -1,16 +1,12 @@
-export type Map = Obj;
+export type Map = any;
 export type CellValue = number | string | boolean | Date | Error;
 export type Filter = (value: any, info: CellInfo) => any;
 export type CellFunc = (col: string, automapKey?: boolean) => CellValue;
 
-export interface Obj {
-  [key: string]: any;
-}
-
 export interface Automap {
   headerRowNum?: number;
   scope?: (
-    value: CellValue,
+    value: CellValue | undefined,
     addr: string,
     rowNum: number,
     colNum: number
